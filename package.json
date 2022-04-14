@@ -1,0 +1,33 @@
+{
+    "name": "phaser3-project-template",
+    "version": "1.1.2",
+    "description": "A Phaser 3 Project Template",
+    "main": "src/index.js",
+    "scripts": {
+        "build": "webpack --config webpack/prod.js ",
+        "start": "webpack-dev-server --config webpack/base.js --open"
+    },
+    "author": "Thomas SAULAY - TromaGodspeed - EpicRamen3D",
+    "license": "MIT",
+    "licenseUrl": "http://www.opensource.org/licenses/mit-license.php",
+    "homepage": "https://thomas.larocade.com",
+    "devDependencies": {
+        "@babel/core": "^7.7.2",
+        "@babel/preset-env": "^7.7.1",
+        "babel-loader": "^8.0.6",
+        "clean-webpack-plugin": "^3.0.0",
+        "file-loader": "^4.2.0",
+        "html-webpack-plugin": "^3.2.0",
+        "raw-loader": "^3.1.0",
+        "terser-webpack-plugin": "^2.2.1",
+        "webpack": "^4.41.2",
+        "webpack-cli": "^3.3.10",
+        "webpack-dev-server": "^3.9.0",
+        "webpack-merge": "^4.2.2"
+    },
+    "dependencies": {
+        "express": "^4.17.3",
+        "phaser": "^3.50.0",
+        "socket.io": "^4.4.1"
+    }
+}
