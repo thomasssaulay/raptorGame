@@ -33,7 +33,7 @@ export default class Entity extends Phaser.GameObjects.Sprite {
                 let bodies = this.scene.physics.overlapCirc(this.x, this.y, this.data.detectionRadius, true, false);
                 bodies.forEach(b => {
                     if (b.gameObject.parentEntity !== undefined) {
-                        if (b.gameObject.parentEntity.name === "Raptor") {
+                        if (b.gameObject.parentEntity.name === "Raptor" && this.data.affraid) {
                             this.setState("fear");
                         } else {
                             if (this.state === "fear")
@@ -87,6 +87,7 @@ export default class Entity extends Phaser.GameObjects.Sprite {
 
     onHit() {
         this.isHit = true;
+        if(!this.data.affraid) this.data.affraid = true;
         this.blink();
         this.resetBlinkTimer();
         this.blinkTimer = this.scene.time.delayedCall(Globals.BLINK_DELAY * Globals.BLINK_REPEAT, () => { this.isHit = false }, [], this);
@@ -113,7 +114,6 @@ export default class Entity extends Phaser.GameObjects.Sprite {
                 break;
 
             case "fear":
-                console.log("Fear");
                 if (this.wanderTimer !== null) this.wanderTimer.remove();
                 this.wanderTimer = null;
                 const a = Phaser.Math.Angle.Reverse(Phaser.Math.Angle.Between(this.x, this.y, this.scene.raptor.x, this.scene.raptor.y));
