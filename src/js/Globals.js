@@ -7,43 +7,63 @@ export const DEBUG_MODE = true;
 export const ANIMATION_FRAMERATE = 10;
 export const BLINK_DELAY = 250;
 export const BLINK_REPEAT = 5;
-
+export const INVENTORY_SPACE = 3;
 
 
 export const ENTITIES = {
     "dummy": {
         "name": "Dummy",
+        "color": 0x272736,
         "detectionTime": 1000,
         "detectionRadius": 50,
         "speed": 10,
         "drops": "",
-        "hp": 9999,
+        "dropsMax": 3,
+        "hp": 9999
     },
     "sheep": {
         "name": "Sheep",
+        "color": 0xffffeb,
         "detectionTime": 600,
         "detectionRadius": 100,
         "affraid": false,
-        "speed": 40,
+        "speed": 50,
         "drops": "",
-        "hp": 5,
+        "dropsMax": 3,
+        "hp": 5
     },
     "chicken": {
         "name": "Chicken",
+        "color": 0xf2a65e,
         "detectionTime": 400,
         "detectionRadius": 60,
         "affraid": true,
-        "speed": 50,
+        "speed": 55,
         "drops": "",
-        "hp": 3,
+        "dropsMax": 3,
+        "hp": 3
+    },
+    "pig": {
+        "name": "Pig",
+        "color": 0xffb5b5,
+        "detectionTime": 400,
+        "detectionRadius": 120,
+        "affraid": false,
+        "speed": 45,
+        "drops": "porkchop",
+        "dropsMax": 3,
+        "hp": 2
     }
 }
+
+// export const ITEMS = ["porkchops", "chicken", "mutton"];
+
 
 export const DIRECTIONS = {
     "EAST": new Phaser.Math.Vector2(1, 0),
     "SOUTH": new Phaser.Math.Vector2(0, 1),
     "WEST": new Phaser.Math.Vector2(-1, 0),
-    "NORTH": new Phaser.Math.Vector2(0, -1),
+    "NORTH": new Phaser.Math.Vector2(0, -1)
 }
 
 export const PALETTE = [

@@ -1,13 +1,13 @@
 import Phaser from "phaser";
 
 export default class SceneMainMenu extends Phaser.Scene {
-  constructor() {
-    super({ key: "SceneMainMenu" });
-  }
+    constructor() {
+        super({key: "SceneMainMenu"});
+    }
 
-  preload() {}
+    preload() {}
 
-  create() {
-    this.scene.start("SceneMain");
-  }
+    create() {
+        this.scene.start("SceneMain");
+    }
 }
