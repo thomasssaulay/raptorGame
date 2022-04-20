@@ -6,7 +6,7 @@ import Counter from "../entities/Counter";
 
 export default class SceneMain extends Phaser.Scene {
     constructor() {
-        super({key: "SceneMain"});
+        super({ key: "SceneMain" });
     }
 
     preload() {
@@ -27,16 +27,16 @@ export default class SceneMain extends Phaser.Scene {
             frameHeight: 17
         });
         this.load.spritesheet("sheep", "sprites/entities/sheep.png", {
-            frameWidth: 21,
-            frameHeight: 16
+            frameWidth: 22,
+            frameHeight: 17
         });
         this.load.spritesheet("chicken", "sprites/entities/chicken.png", {
-            frameWidth: 17,
-            frameHeight: 19
+            frameWidth: 18,
+            frameHeight: 20
         });
         this.load.spritesheet("pig", "sprites/entities/pig.png", {
-            frameWidth: 31,
-            frameHeight: 17
+            frameWidth: 32,
+            frameHeight: 18
         });
         this.load.spritesheet("dummy", "sprites/entities/dummy.png", {
             frameWidth: 20,
@@ -46,8 +46,16 @@ export default class SceneMain extends Phaser.Scene {
 
         // Items
         this.load.spritesheet("porkchop", "sprites/items/porkchop.png", {
-            frameWidth: 10,
-            frameHeight: 10
+            frameWidth: 12,
+            frameHeight: 15
+        });
+        this.load.spritesheet("steak", "sprites/items/steak.png", {
+            frameWidth: 16,
+            frameHeight: 12
+        });
+        this.load.spritesheet("thighs", "sprites/items/thighs.png", {
+            frameWidth: 12,
+            frameHeight: 12
         });
 
         // HUD
@@ -66,23 +74,26 @@ export default class SceneMain extends Phaser.Scene {
     }
 
     create() {
-        const {width, height} = this.sys.game.config;
+        const { width, height } = this.sys.game.config;
 
         this.width = width;
         this.height = height;
 
         // Map creation
-        this.map = this.make.tilemap({key: "map", tileWidth: 16, tileHeight: 16});
+        this.map = this.make.tilemap({ key: "map", tileWidth: 16, tileHeight: 16 });
         const grassTileset = this.map.addTilesetImage("grass", "grass");
         this.grassLayer = this.map.createLayer("grass", grassTileset);
         const dirtTileset = this.map.addTilesetImage("dirt", "dirt");
         this.dirtLayer = this.map.createLayer("dirt", dirtTileset);
         const topTileset = this.map.addTilesetImage("trees", "trees");
         this.topLayer = this.map.createLayer("top", topTileset).setDepth(10);
-        this.topLayer.setCollisionByProperty({collide: true});
+        this.topLayer.setCollisionByProperty({ collide: true });
 
         // Counters
-        this.counter = new Counter(this, 300, 48);
+        this.counters = [];
+        for (let i = 0; i < 4; i++) {
+            this.counters.push(new Counter(this, 300 + i * 32, 48));
+        }
 
         // Keyboard key binding
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -110,10 +121,13 @@ export default class SceneMain extends Phaser.Scene {
         // Initialize HUD scene
         // Re-run it if already loaded in a previous run
         this.hud = this.scene.get("Hud");
-        if (!this.hud.scene.isActive()) 
+        if (!this.hud.scene.isActive())
             this.scene.run("Hud");
-        
 
+        //shaders
+        this.lights.enable().setAmbientColor(0x555555);
+        this.raptorLight = this.lights.addLight(0, 0, 200).setScrollFactor(0.0);
+        this.lights.addLight(0, 100, 100).setColor(0xff0000).setIntensity(3.0);
 
     }
 

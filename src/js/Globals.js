@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 
 // DEBUG
-export const DEBUG_MODE = true;
+export const DEBUG_MODE = false;
 
 // GAME CONSTANTS
 export const ANIMATION_FRAMERATE = 10;
@@ -28,8 +28,8 @@ export const ENTITIES = {
         "detectionRadius": 100,
         "affraid": false,
         "speed": 50,
-        "drops": "",
-        "dropsMax": 3,
+        "drops": "steak",
+        "dropsMax": 2,
         "hp": 5
     },
     "chicken": {
@@ -39,7 +39,7 @@ export const ENTITIES = {
         "detectionRadius": 60,
         "affraid": true,
         "speed": 55,
-        "drops": "",
+        "drops": "thighs",
         "dropsMax": 3,
         "hp": 3
     },
@@ -51,7 +51,7 @@ export const ENTITIES = {
         "affraid": false,
         "speed": 45,
         "drops": "porkchop",
-        "dropsMax": 3,
+        "dropsMax": 2,
         "hp": 2
     }
 }
