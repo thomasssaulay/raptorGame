@@ -28,8 +28,9 @@ export default class Entity extends Phaser.GameObjects.Sprite {
 
         this.sprite.body.setSize(this.width - 2, this.height - 2);
 
-        // Collision with map
+        // Collision with map / borders / counters
         this.scene.physics.add.collider(this.sprite, this.scene.topLayer, null, null, this.scene);
+        this.scene.physics.add.collider(this.sprite, this.scene.counter.sprite, null, null, this.scene);
         this.sprite.setCollideWorldBounds(true);
 
         this.target = null;
@@ -51,7 +52,6 @@ export default class Entity extends Phaser.GameObjects.Sprite {
                             if (this.state === "fear") 
                                 this.setState("wander");
                             
-
 
                         }
                     }

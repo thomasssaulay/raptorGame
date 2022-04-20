@@ -34,7 +34,7 @@ export default class Item extends Phaser.GameObjects.Sprite {
         this.y = this.sprite.y;
     }
 
-    onCollideWithRaptor() { // console.log("ON COLLIDE :: Collide with " + this.name);
+    onCollideWithRaptor() { // TODO :: Show "pick up" sign and wait for input before adding
 
         this.scene.hud.addItemToInventory(this.name);
 
@@ -45,7 +45,5 @@ export default class Item extends Phaser.GameObjects.Sprite {
         if (this.sprite !== null) 
             this.sprite.destroy();
         
-
-
     }
 }

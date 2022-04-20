@@ -3,6 +3,7 @@ import Phaser from "phaser";
 import * as Globals from "../Globals";
 import * as ParticleManager from "../ParticleManager";
 import Entity from "./Entity";
+import Item from "./Item";
 
 export default class Raptor extends Phaser.GameObjects.Sprite {
     constructor(scene, x, y) {
@@ -69,12 +70,16 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
         this.slashSprite.setVisible(false);
         this.slashSprite.body.checkCollision.none = true;
 
-        // Collision with map
+        // Kitchen stuff
+        this.nearestCounter = null;
+
+        // Collision with map / borders / counters
         this.scene.physics.add.collider(this.sprite, this.scene.topLayer, null, null, this.scene);
+        this.scene.physics.add.collider(this.sprite, this.scene.counter.sprite, null, null, this.scene);
         this.sprite.setCollideWorldBounds(true);
     }
 
-    handlePlayerControls() { // Keyboard controls
+    handlePlayerMovements() {
         let vx = 0;
         let vy = 0;
         if (this.scene.cursors.left.isDown || this.scene.cursors.right.isDown || this.scene.cursors.up.isDown || this.scene.cursors.down.isDown) { // Sets direction according to input
@@ -140,14 +145,68 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
         this.y = this.sprite.body.y;
     }
 
-    handlePlayerAttack() {
-        if (Phaser.Input.Keyboard.JustDown(this.scene.cursorsAttack.left)) {
+    handlePlayerControls() { // Attack
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.attack)) 
             if (this.canAttack) 
                 this.attack();
             
+        
 
 
-        }
+        // Use / Pickup
+
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.use)) 
+            if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold !== null) { // this.nearestCounter.hold = this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold;
+                const item = this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold;
+                this.scene.hud.removeCurrentItemFromInventory();
+                this.nearestCounter.hold = new Item(this.scene, this.nearestCounter.x, this.nearestCounter.y, item.name);
+            }
+        
+
+
+        // Action TODO ::
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.action)) 
+            console.log(this.nearestCounter);
+        
+
+
+        // Drop
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.drop)) 
+            if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold !== null) {
+                this.scene.hud.removeCurrentItemFromInventory();
+            }
+        
+
+
+        // Inventory
+
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.one)) 
+            if (this.scene.hud.currentSlot !== 0) 
+                this.scene.hud.onChangeCurrentSlot(0)
+
+
+            
+        
+
+
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.two)) 
+            if (this.scene.hud.currentSlot !== 1) 
+                this.scene.hud.onChangeCurrentSlot(1)
+
+
+            
+        
+
+
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.three)) 
+            if (this.scene.hud.currentSlot !== 2) 
+                this.scene.hud.onChangeCurrentSlot(2)
+
+
+            
+        
+
+
     }
 
     attack() {

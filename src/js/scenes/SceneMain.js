@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import Raptor from "../entities/Raptor";
 import * as EntityManager from "../entities/EntityManager";
+import Counter from "../entities/Counter";
 
 
 export default class SceneMain extends Phaser.Scene {
@@ -41,6 +42,7 @@ export default class SceneMain extends Phaser.Scene {
             frameWidth: 20,
             frameHeight: 18
         });
+        this.load.image("counter", "sprites/entities/counter.png");
 
         // Items
         this.load.spritesheet("porkchop", "sprites/items/porkchop.png", {
@@ -79,14 +81,20 @@ export default class SceneMain extends Phaser.Scene {
         this.topLayer = this.map.createLayer("top", topTileset).setDepth(10);
         this.topLayer.setCollisionByProperty({collide: true});
 
+        // Counters
+        this.counter = new Counter(this, 300, 48);
+
         // Keyboard key binding
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.cursorsAttack = this.input.keyboard.addKeys({up: Phaser.Input.Keyboard.KeyCodes.Z, down: Phaser.Input.Keyboard.KeyCodes.S, left: Phaser.Input.Keyboard.KeyCodes.Q, right: Phaser.Input.Keyboard.KeyCodes.D});
-
-        this.add.text(width / 2, 64, "main scene", {
-            font: "25pt PearSoda",
-            color: "white"
-        }).setOrigin(0.5, 0.5);
+        this.keyboardBind = this.input.keyboard.addKeys({
+            attack: Phaser.Input.Keyboard.KeyCodes.SPACE,
+            one: Phaser.Input.Keyboard.KeyCodes.ONE,
+            two: Phaser.Input.Keyboard.KeyCodes.TWO,
+            three: Phaser.Input.Keyboard.KeyCodes.THREE,
+            use: Phaser.Input.Keyboard.KeyCodes.E,
+            action: Phaser.Input.Keyboard.KeyCodes.F,
+            drop: Phaser.Input.Keyboard.KeyCodes.G
+        });
 
         this.raptor = new Raptor(this, this.width / 2, this.height / 2);
 
@@ -105,11 +113,13 @@ export default class SceneMain extends Phaser.Scene {
         if (!this.hud.scene.isActive()) 
             this.scene.run("Hud");
         
+
+
     }
 
     update(time, delta) {
+        this.raptor.handlePlayerMovements();
         this.raptor.handlePlayerControls();
-        this.raptor.handlePlayerAttack();
         this.entities.forEach(e => e.update());
     }
 }

@@ -29,6 +29,8 @@ export default class HudScene extends Phaser.Scene {
             this.HUDInventory.push(this.add.sprite(128 + i * 64, this.height - 32, "invSlot", 0).setOrigin(0.5, 0.5));
             this.HUDInventory[this.HUDInventory.length - 1].hold = null;
         }
+
+        this.onChangeCurrentSlot(0);
     }
 
     initHudScene() {
@@ -55,13 +57,27 @@ export default class HudScene extends Phaser.Scene {
         // this.HUDQuit.on("pointerup", this.onQuitGame, this);
     }
 
-    updateHud(event) {
-        // Main update of the entire HUD
+    updateHud(event) { // Main update of the entire HUD
+    }
 
-        // this.HUDLoopCounter.setText("LOOP " + this.sceneMain.worm.loopCount);
-        // this.HUDWormSize.setText("SIZE " + this.sceneMain.worm.bodySize);
-        // this.updateCards();
+    onChangeCurrentSlot(num) {
+        this.tweens.add({
+            targets: this.HUDInventory[this.currentSlot],
+            scale: 1,
+            ease: 'Sine.easeInOut',
+            duration: 100,
+            repeat: 0
+        });
 
+        this.currentSlot = num;
+
+        this.tweens.add({
+            targets: this.HUDInventory[this.currentSlot],
+            scale: 1.25,
+            ease: 'Sine.easeInOut',
+            duration: 100,
+            repeat: 0
+        });
     }
 
 
@@ -74,6 +90,13 @@ export default class HudScene extends Phaser.Scene {
                 break;
             }
         }
+    }
+
+    removeCurrentItemFromInventory() {
+        console.log('Deleted ' + this.HUDInventory[this.currentSlot].hold.name + ' of inventory.');
+
+        this.HUDInventory[this.currentSlot].hold.destroy();
+        this.HUDInventory[this.currentSlot].hold = null;
     }
 
     onQuitGame() {
