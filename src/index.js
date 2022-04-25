@@ -12,11 +12,12 @@ import SceneHud from "./js/scenes/SceneHud";
 
 const config = {
     type: Phaser.AUTO,
+    mode: Phaser.Scale.ScaleModes.FIT,
     parent: 'game-container',
-    width: 400,
-    height: 300,
+    width: 800, // 400 * 300 w/ zoom:2
+    height: 600,
     backgroundColor: "#323e4f",
-    zoom: 2,
+    zoom: 1,
     pixelArt: true,
     physics: {
         default: 'arcade',

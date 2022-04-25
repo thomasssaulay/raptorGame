@@ -1,8 +1,6 @@
 import Phaser from "phaser";
 
 import * as Globals from "../Globals";
-import * as ParticleManager from "../ParticleManager";
-import Entity from "./Entity";
 import Item from "./Item";
 
 export default class Raptor extends Phaser.GameObjects.Sprite {
@@ -22,6 +20,10 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
             w: 8,
             h: 16
         };
+        this.raptorHitbox = {
+            w: 24,
+            h: 20
+        }
 
         this.sprite = this.scene.physics.add.sprite(this.x, this.y, "raptor", 0).setOrigin(0.5, 0.5);
         this.sprite.parentEntity = this;
@@ -46,6 +48,10 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
         });
         this.sprite.play("idle");
 
+        this.infoBox = this.scene.add.sprite(this.x, this.y - 16, "keys", 0).setOrigin(0.5, 0.5).setVisible(false).setDepth(10);
+        this.infoBoxPick = this.scene.add.sprite(this.x, this.y - 32, "keys", 3).setOrigin(0.5, 0.5).setVisible(false).setDepth(10);
+        this.infoBoxServe = this.scene.add.sprite(this.x, this.y - 32, "keys", 2).setOrigin(0.5, 0.5).setVisible(false).setDepth(10);
+
         this.width = this.sprite.displayWidth;
         this.height = this.sprite.displayHeight;
 
@@ -65,19 +71,21 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
         });
         this.slashSprite.play("slashing");
 
-        this.sprite.body.setSize(14, 12);
+        this.sprite.body.setSize(this.raptorHitbox.w, this.raptorHitbox.h);
+        this.sprite.body.setOffset(this.width / 2 - this.raptorHitbox.w / 2, this.height / 2);
         this.slashSprite.body.setSize(this.slashHitbox.w, this.slashHitbox.h);
         this.slashSprite.setVisible(false);
         this.slashSprite.body.checkCollision.none = true;
 
-        // Kitchen stuff
         this.nearestCounter = null;
+        this.nearTruck = false;
 
         // Collision with map / borders / counters
         this.scene.physics.add.collider(this.sprite, this.scene.topLayer, null, null, this.scene);
         this.scene.counters.forEach(counter => {
             this.scene.physics.add.collider(this.sprite, counter.sprite, null, null, this.scene);
         });
+        this.scene.physics.add.collider(this.sprite, this.scene.truck.sprite, null, null, this.scene);
         this.sprite.setCollideWorldBounds(true);
     }
 
@@ -110,8 +118,6 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
             if (this.sprite.anims.currentAnim.key !== "walk")
                 this.sprite.play("walk");
 
-
-
             // Adapt slash position
             this.slashSprite.setPosition(this.x + this.sprite.body.halfWidth + this.direction.x * this.sprite.body.sourceWidth, this.y + this.sprite.body.halfHeight + this.direction.y * this.sprite.body.sourceHeight);
             // Adapt slash direction
@@ -120,15 +126,13 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
             else
                 this.slashSprite.flipX = false;
 
-
-
-            if (this.direction === Globals.DIRECTIONS["NORTH"]) { // this.slashSprite.rotation = -90;
+            if (this.direction === Globals.DIRECTIONS["NORTH"]) {
                 this.slashSprite.body.rotation = -90;
                 this.slashSprite.body.setSize(this.slashHitbox.h, this.slashHitbox.w);
-            } else if (this.direction === Globals.DIRECTIONS["SOUTH"]) { // this.slashSprite.rotation = 90;
+            } else if (this.direction === Globals.DIRECTIONS["SOUTH"]) {
                 this.slashSprite.body.rotation = 90;
                 this.slashSprite.body.setSize(this.slashHitbox.h, this.slashHitbox.w);
-            } else { // this.slashSprite.rotation = 0;
+            } else {
                 this.slashSprite.body.rotation = 0;
                 this.slashSprite.body.setSize(this.slashHitbox.w, this.slashHitbox.h);
             }
@@ -152,63 +156,82 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
             if (this.canAttack)
                 this.attack();
 
-
-
-
-            // Use / Pickup
-
-        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.use))
-            if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold !== null && this.nearestCounter !== null) {
+            // Place / Pickup / Mix / Serve
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.use)) {
+            // Pick
+            if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold === null && this.nearestCounter !== null && this.nearestCounter.hold !== null) {
+                const item = this.nearestCounter.hold;
+                this.scene.hud.addItemToInventory(item.name, item.chopped, item.contains);
+                this.nearestCounter.hold.destroy();
+                this.nearestCounter.hold = null;
+            }
+            // Place
+            else if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold !== null && this.nearestCounter !== null && this.nearestCounter.hold === null) {
                 const item = this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold;
                 this.scene.hud.removeCurrentItemFromInventory();
-                this.nearestCounter.hold = new Item(this.scene, this.nearestCounter.x, this.nearestCounter.y, item.name);
+                this.nearestCounter.hold = new Item(this.scene, this.nearestCounter.x, this.nearestCounter.y - 10, item.name, false, item.chopped, item.contains);
             }
+            // Mix
+            else if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold !== null && this.nearestCounter !== null && this.nearestCounter.hold !== null) {
+                const itemInHand = this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold;
+                const itemOnCounter = this.nearestCounter.hold;
+                this.nearestCounter.hold.destroy();
+                this.nearestCounter.hold = null;
+                if (itemOnCounter.name !== "Box") {
+                    this.nearestCounter.hold = new Item(this.scene, this.nearestCounter.x, this.nearestCounter.y - 10, "Box", false);
+                    this.nearestCounter.hold.setBox();
+                    this.nearestCounter.hold.contains.push(itemOnCounter.name)
+                    this.nearestCounter.hold.contains.push(itemInHand.name);
+                } else {
+                    this.nearestCounter.hold = new Item(this.scene, this.nearestCounter.x, this.nearestCounter.y - 10, "Box", false, false, itemOnCounter.contains);
+                    this.nearestCounter.hold.contains.push(itemInHand.name);
+                }
+                this.scene.hud.removeCurrentItemFromInventory();
+            }
+            // Serve
+            if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold !== null && this.nearTruck) {
+                this.scene.hud.checkServing(this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold);
+                this.scene.hud.removeCurrentItemFromInventory();
+            }
+        }
 
-
-
-            // Action TODO ::
-        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.action))
-            console.log(this.nearestCounter);
-
-
+        // Action - Chop
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.action)) {
+            if (this.nearestCounter)
+                if (this.nearestCounter.hold !== null) {
+                    if (!this.nearestCounter.hold.chopped && this.nearestCounter.hold.choppable) {
+                        this.nearestCounter.hold.chop();
+                    }
+                }
+        }
 
         // Drop
-        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.drop))
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.drop)) {
             if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold !== null) {
                 this.scene.hud.removeCurrentItemFromInventory();
             }
+        }
 
+        // Debug
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.debug)) {
+            if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold === null) {
+                this.scene.hud.addItemToInventory("steak");
+            }
+            this.scene.hud.addOrder();
+        }
 
-
-            // Inventory
-
+        // Inventory
         if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.one))
             if (this.scene.hud.currentSlot !== 0)
                 this.scene.hud.onChangeCurrentSlot(0)
-
-
-
-
-
 
         if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.two))
             if (this.scene.hud.currentSlot !== 1)
                 this.scene.hud.onChangeCurrentSlot(1)
 
-
-
-
-
-
         if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.three))
             if (this.scene.hud.currentSlot !== 2)
                 this.scene.hud.onChangeCurrentSlot(2)
-
-
-
-
-
-
     }
 
     attack() {

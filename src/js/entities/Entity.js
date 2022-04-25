@@ -46,13 +46,14 @@ export default class Entity extends Phaser.GameObjects.Sprite {
         this.width = this.sprite.displayWidth;
         this.height = this.sprite.displayHeight;
 
-        this.sprite.body.setSize(this.width - 2, this.height - 2);
+        this.sprite.body.setSize(this.width - 2, this.height - 2).setBounce(0);
 
         // Collision with map / borders / counters
         this.scene.physics.add.collider(this.sprite, this.scene.topLayer, null, null, this.scene);
         this.scene.counters.forEach(counter => {
             this.scene.physics.add.collider(this.sprite, counter.sprite, null, null, this.scene);
         });
+        this.scene.physics.add.collider(this.sprite, this.scene.truck.sprite, null, null, this.scene);
         this.sprite.setCollideWorldBounds(true);
 
         this.target = null;
@@ -62,9 +63,6 @@ export default class Entity extends Phaser.GameObjects.Sprite {
             callback: () => {
                 if (Globals.DEBUG_MODE)
                     this.debugDetection = this.scene.add.circle(this.x, this.y, this.data.detectionRadius).setStrokeStyle(2, this.data.color);
-
-
-
                 let bodies = this.scene.physics.overlapCirc(this.x, this.y, this.data.detectionRadius, true, false);
                 bodies.forEach(b => {
                     if (b.gameObject.parentEntity !== undefined) {
@@ -73,8 +71,6 @@ export default class Entity extends Phaser.GameObjects.Sprite {
                         } else {
                             if (this.state === "fear")
                                 this.setState("wander");
-
-
                         }
                     }
                 });
@@ -82,13 +78,23 @@ export default class Entity extends Phaser.GameObjects.Sprite {
                     this.scene.time.delayedCall(100, () => {
                         this.debugDetection.destroy();
                     }, [], this);
-
-
-
             },
             callbackScope: this,
             loop: true
         });
+
+        // Egg spawn for chicken
+        if (this.data.name === "Chicken")
+            this.eggTimer = this.scene.time.addEvent({
+                delay: Phaser.Math.Between(Globals.MIN_EGG_SPAWN_TIME, Globals.MAX_EGG_SPAWN_TIME),
+                callback: () => {
+                    const dropOffset = 16;
+                    const egg = new Item(this.scene, this.x + Phaser.Math.Between(-dropOffset, dropOffset), this.y + Phaser.Math.Between(-dropOffset, dropOffset), "egg", true)
+                    this.scene.physics.add.overlap(this.scene.raptor.sprite, egg.sprite, (collider, it) => it.parentEntity.onCollideWithRaptor());
+                },
+                callbackScope: this,
+                loop: true
+            });
 
         this.setState("wander");
     }
@@ -102,7 +108,7 @@ export default class Entity extends Phaser.GameObjects.Sprite {
             // Sprite direction
             this.sprite.flipX = this.x >= this.target.x;
 
-            if (distanceToTarget < 2) {
+            if (distanceToTarget < 4) {
                 this.sprite.body.reset(this.target.x, this.target.y);
                 this.sprite.play("idle");
             }
@@ -117,9 +123,6 @@ export default class Entity extends Phaser.GameObjects.Sprite {
                     this.sprite.clearTint();
                 else
                     this.sprite.setTintFill(0xfafafa);
-
-
-
             },
             callbackScope: this,
             repeat: Globals.BLINK_REPEAT
@@ -137,8 +140,6 @@ export default class Entity extends Phaser.GameObjects.Sprite {
         this.isHit = true;
         if (!this.data.affraid)
             this.data.affraid = true;
-
-
 
         this.blink();
         this.resetBlinkTimer();
@@ -201,14 +202,10 @@ export default class Entity extends Phaser.GameObjects.Sprite {
 
                 break;
 
-
-
             case "fear":
                 this.sprite.play("walk");
                 if (this.wanderTimer !== null)
                     this.wanderTimer.remove();
-
-
 
                 this.wanderTimer = null;
                 const a = Phaser.Math.Angle.Reverse(Phaser.Math.Angle.Between(this.x, this.y, this.scene.raptor.x, this.scene.raptor.y));
@@ -223,13 +220,9 @@ export default class Entity extends Phaser.GameObjects.Sprite {
                 if (this.wanderTimer !== null)
                     this.wanderTimer.remove();
 
-
-
                 this.wanderTimer = null;
                 if (this.detectionTimer !== null)
                     this.detectionTimer.remove();
-
-
 
                 this.detectionTimer = null;
                 this.target = null;

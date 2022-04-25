@@ -1,8 +1,9 @@
 import Phaser from "phaser";
 import * as Globals from "../Globals";
 
-export default class LoadingBar {
+export default class LoadingBar extends Phaser.GameObjects.Container {
     constructor(scene, x, y, value, maxValue, width = 64, height = 8) {
+        super(scene);
         this.scene = scene;
 
         this.width = width;
@@ -59,7 +60,7 @@ export default class LoadingBar {
         this.bg.clear();
 
         //  BG
-        this.bg.lineStyle(1, Globals.PALETTE[1]);
+        this.bg.lineStyle(4, Globals.PALETTE[20]);
         this.bg.strokeRect(this.x, this.y, this.width, this.height);
 
         //  Value

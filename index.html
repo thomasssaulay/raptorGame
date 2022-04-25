@@ -8,6 +8,11 @@
     <title>Raptor Food Truck</title>
 
     <style>
+        @font-face {
+            font-family: "rainyhearts";
+            src: url("./src/assets/fonts/rainyhearts.ttf") format("truetype");
+        }
+        
         html,
         body,
         #game-container {
@@ -22,10 +27,19 @@
             align-items: center;
             justify-content: center;
         }
+        
+        .load-font {
+            font-family: "rainyhearts";
+            position: absolute;
+            top: -100px;
+            left: -100px;
+            visibility: hidden;
+        }
     </style>
 </head>
 
 <body>
+    <div class="load-font">.</div>
     <div id="game-container"></div>
 </body>
 

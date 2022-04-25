@@ -26,8 +26,7 @@
         "webpack-merge": "^4.2.2"
     },
     "dependencies": {
-        "express": "^4.17.3",
-        "phaser": "^3.50.0",
-        "socket.io": "^4.4.1"
+        "glslify": "^7.1.1",
+        "phaser": "^3.50.0"
     }
 }

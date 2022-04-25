@@ -2,12 +2,16 @@ import Phaser from "phaser";
 
 // DEBUG
 export const DEBUG_MODE = false;
+export const ENABLE_LIGHTS = true;
 
 // GAME CONSTANTS
-export const ANIMATION_FRAMERATE = 10;
+export const ANIMATION_FRAMERATE = 8;
 export const BLINK_DELAY = 250;
 export const BLINK_REPEAT = 5;
 export const INVENTORY_SPACE = 3;
+export const MAX_ORDERS = 6;
+export const MIN_EGG_SPAWN_TIME = 50000;
+export const MAX_EGG_SPAWN_TIME = 200000;
 
 
 export const ENTITIES = {
@@ -56,7 +60,22 @@ export const ENTITIES = {
     }
 }
 
-// export const ITEMS = ["porkchops", "chicken", "mutton"];
+export const ITEMS = [
+    "box", "closed box", "steak", "chopped steak", "thighs", "chopped thighs", "porkchop", "chopped porkchop", "egg", "berry"
+]
+
+export const MEALS = [
+    // { "name": "Tartare", "recipe": ["chopped steak", "egg"] },
+    { "name": "Steak XL", "recipe": ["steak", "steak"], "time": 50000 },
+    { "name": "Big Ribs", "recipe": ["porkchop", "porkchop", "porkchop"], "time": 20000 },
+    // { "name": "Egg Salad", "recipe": ["egg", "berry"] },
+    // { "name": "Carpaccio", "recipe": ["chopped steak", "chopped thighs", "mushroom"] },
+    // { "name": "Parisa", "recipe": ["chopped steak", "chopped porkchop", "berry"] },
+    // { "name": "Kibbeh", "recipe": ["chopped porkchop", "berry"] },
+    // { "name": "Toriwasa", "recipe": ["thighs", "egg"] },
+    // { "name": "Bucket", "recipe": ["thighs", "thighs"] },
+    // { "name": "Bucket XL", "recipe": ["thighs", "thighs", "thighs"] },
+]
 
 
 export const DIRECTIONS = {

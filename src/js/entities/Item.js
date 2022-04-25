@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import * as Globals from "../Globals";
 
 export default class Item extends Phaser.GameObjects.Sprite {
-    constructor(scene, x, y, name) {
+    constructor(scene, x, y, name, moving = true, chopped = false, contains = []) {
         super(scene);
 
         this.scene = scene;
@@ -11,7 +11,12 @@ export default class Item extends Phaser.GameObjects.Sprite {
         this.x = x;
         this.y = y;
 
-        this.sprite = this.scene.physics.add.sprite(this.x, this.y, name, 0).setOrigin(0.5, 0.5).setDepth(1);
+        this.chopped = chopped;
+        this.choppable = (name === "porkchop" || name === "steak" || name === "thighs") ? true : false;
+
+        let frame = Globals.ITEMS.indexOf(name);
+        if (frame < 0) frame = 1;
+        this.sprite = this.scene.physics.add.sprite(this.x, this.y, "items", frame).setOrigin(0.5, 0.5).setDepth(1);
         this.sprite.parentEntity = this;
 
         this.width = this.sprite.displayWidth;
@@ -19,14 +24,17 @@ export default class Item extends Phaser.GameObjects.Sprite {
 
         this.sprite.body.setSize(this.width - 4, this.height - 4);
 
-        this.scene.tweens.add({
-            targets: this.sprite,
-            y: this.y - 4,
-            ease: 'Sine.easeInOut',
-            duration: 1000,
-            yoyo: true,
-            repeat: -1
-        });
+        this.contains = contains;
+
+        if (moving)
+            this.scene.tweens.add({
+                targets: this.sprite,
+                y: this.y - 4,
+                ease: 'Sine.easeInOut',
+                duration: 1000,
+                yoyo: true,
+                repeat: -1
+            });
     }
 
     update() {
@@ -34,16 +42,27 @@ export default class Item extends Phaser.GameObjects.Sprite {
         this.y = this.sprite.y;
     }
 
-    onCollideWithRaptor() { // TODO :: Show "pick up" sign and wait for input before adding
+    onCollideWithRaptor() {
+        if (this.scene.hud.emptyInventorySlot > 0) {
+            this.scene.hud.addItemToInventory(this.name);
 
-        this.scene.hud.addItemToInventory(this.name);
+            this.destroy();
+        }
+    }
 
-        this.destroy();
+    chop() {
+        this.chopped = true;
+        this.name = "Chopped " + this.name;
+        this.sprite.setFrame(this.sprite.frame.name + 1);
+    }
+
+    setBox() {
+        this.name = "Box";
+        this.sprite.setFrame(0);
     }
 
     destroy() {
-        if (this.sprite !== null) 
+        if (this.sprite !== null)
             this.sprite.destroy();
-        
     }
 }

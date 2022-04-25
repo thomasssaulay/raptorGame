@@ -21,42 +21,64 @@ export default class Counter extends Phaser.GameObjects.Sprite {
 
         this.hold = null;
 
-        this.detectionRadius = 40;
-        this.detectionTime = 400;
+        this.detectionRadius = 48;
+        this.detectionTime = 100;
 
         this.detectionTimer = this.scene.time.addEvent({
             delay: this.detectionTime,
             callback: () => {
-                if (Globals.DEBUG_MODE) 
-                    this.debugDetection = this.scene.add.circle(this.x, this.y, this.detectionRadius).setStrokeStyle(2, 0x121212);
-                
+                if (Globals.DEBUG_MODE)
+                    this.debugDetection = this.scene.add.rectangle(this.x, this.y, this.width, this.detectionRadius).setStrokeStyle(2, 0x121212);
 
-
-                let bodies = this.scene.physics.overlapCirc(this.x, this.y, this.detectionRadius, true, false);
+                let bodies = this.scene.physics.overlapRect(this.x, this.y, this.width, this.detectionRadius, true, false);
                 let raptorIsNear = false;
                 bodies.forEach(b => {
-                    if (b.gameObject.parentEntity !== undefined) { // Sets reptor's nearestCounter
-                        if (b.gameObject.parentEntity.name === "Raptor") 
+                    if (b.gameObject.parentEntity !== undefined) {
+                        // Sets reptor's nearestCounter
+                        if (b.gameObject.parentEntity.name === "Raptor")
                             raptorIsNear = true;
-                        
-
-
                     }
                 });
-                if (raptorIsNear) 
+                if (raptorIsNear) {
+                    // Raptor close to counter
                     this.scene.raptor.nearestCounter = this;
-                 else {
-                    if (this.scene.raptor.nearestCounter === this) 
+                    // Shows info boxes
+                    // Mix
+                    if (this.hold !== null && this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold !== null) {
+                        this.scene.raptor.infoBoxPick.setVisible(true).setFrame(4).setPosition(this.x, this.y - 35);
+                    }
+                    // Place
+                    if (this.hold === null && this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold !== null)
+                        this.scene.raptor.infoBox.setVisible(true).setFrame(1).setPosition(this.x, this.y - 24);
+                    else
+                        this.scene.raptor.infoBox.setVisible(false);
+                    // Chop
+                    if (this.hold !== null) {
+                        if (!this.hold.chopped && !this.hold.name === "Box" && !this.hold.name === "Egg" && !this.hold.name === "Berry") this.scene.raptor.infoBox.setVisible(true).setFrame(0).setPosition(this.x, this.y - 24);
+                        else this.scene.raptor.infoBox.setVisible(false);
+
+                        if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold === null)
+                            this.scene.raptor.infoBoxPick.setVisible(true).setFrame(3).setPosition(this.x, this.y - 35);
+                        // else {
+                        //     this.scene.raptor.infoBoxPick.setVisible(false);
+                        //     console.log("dazd");
+                        // }
+                    } else {
+                        this.scene.raptor.infoBoxPick.setVisible(false);
+                    }
+
+                } else {
+                    // Raptor leaves counter
+                    if (this.scene.raptor.nearestCounter === this) {
                         this.scene.raptor.nearestCounter = null;
-                    
+                        this.scene.raptor.infoBox.setVisible(false);
+                        this.scene.raptor.infoBoxPick.setVisible(false);
+                    }
                 }
-                if (Globals.DEBUG_MODE) 
+                if (Globals.DEBUG_MODE)
                     this.scene.time.delayedCall(this.detectionTime, () => {
                         this.debugDetection.destroy();
                     }, [], this);
-                
-
-
             },
             callbackScope: this,
             loop: true
@@ -64,24 +86,8 @@ export default class Counter extends Phaser.GameObjects.Sprite {
 
     }
 
-    update() {
-        this.x = this.sprite.x;
-        this.y = this.sprite.y;
-    }
-
-    onCollideWithRaptor() {
-        // TODO :: Show "pick up" sign and wait for input before adding
-
-        // this.scene.hud.addItemToInventory(this.name);
-
-        // this.destroy();
-    }
-
     destroy() {
-        if (this.sprite !== null) 
+        if (this.sprite !== null)
             this.sprite.destroy();
-        
-
-
     }
 }
