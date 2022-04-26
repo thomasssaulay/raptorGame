@@ -52,7 +52,7 @@ export default class Item extends Phaser.GameObjects.Sprite {
 
     chop() {
         this.chopped = true;
-        this.name = "Chopped " + this.name;
+        this.name = "chopped " + this.name;
         this.sprite.setFrame(this.sprite.frame.name + 1);
     }
 
@@ -64,5 +64,8 @@ export default class Item extends Phaser.GameObjects.Sprite {
     destroy() {
         if (this.sprite !== null)
             this.sprite.destroy();
+
+        if (this.name === "egg")
+            this.scene.nEggs--;
     }
 }

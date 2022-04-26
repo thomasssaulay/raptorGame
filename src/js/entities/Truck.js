@@ -16,10 +16,8 @@ export default class Truck extends Phaser.GameObjects.Sprite {
         this.width = this.sprite.displayWidth;
         this.height = this.sprite.displayHeight;
 
-        this.sprite.body.setSize(this.width - 2, this.height - 2);
+        this.sprite.body.setSize(this.width - 2, this.height / 1.5);
         this.sprite.body.setImmovable(true);
-
-        this.hold = null;
 
         this.detectionRadius = 128;
         this.detectionTime = 100;

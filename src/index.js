@@ -14,11 +14,11 @@ const config = {
     type: Phaser.AUTO,
     mode: Phaser.Scale.ScaleModes.FIT,
     parent: 'game-container',
-    width: 800, // 400 * 300 w/ zoom:2
+    width: 600, // 400 * 300 w/ zoom:2
     height: 600,
     backgroundColor: "#323e4f",
-    zoom: 1,
-    pixelArt: true,
+    zoom: 1.25,
+    // pixelArt: true,
     physics: {
         default: 'arcade',
         arcade: {

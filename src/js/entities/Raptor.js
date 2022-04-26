@@ -22,7 +22,7 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
         };
         this.raptorHitbox = {
             w: 24,
-            h: 20
+            h: 26
         }
 
         this.sprite = this.scene.physics.add.sprite(this.x, this.y, "raptor", 0).setOrigin(0.5, 0.5);
@@ -82,6 +82,7 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
 
         // Collision with map / borders / counters
         this.scene.physics.add.collider(this.sprite, this.scene.topLayer, null, null, this.scene);
+        this.scene.physics.add.collider(this.sprite, this.scene.dirtLayer, null, null, this.scene);
         this.scene.counters.forEach(counter => {
             this.scene.physics.add.collider(this.sprite, counter.sprite, null, null, this.scene);
         });
@@ -213,7 +214,7 @@ export default class Raptor extends Phaser.GameObjects.Sprite {
         }
 
         // Debug
-        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.debug)) {
+        if (Phaser.Input.Keyboard.JustDown(this.scene.keyboardBind.debug) && Globals.DEBUG_MODE) {
             if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold === null) {
                 this.scene.hud.addItemToInventory("steak");
             }

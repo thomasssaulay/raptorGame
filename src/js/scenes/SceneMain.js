@@ -4,6 +4,7 @@ import Truck from "../entities/Truck";
 import * as EntityManager from "../entities/EntityManager";
 import * as Globals from "../Globals";
 import Counter from "../entities/Counter";
+import BerryBush from "../entities/BerryBush";
 
 
 export default class SceneMain extends Phaser.Scene {
@@ -46,6 +47,7 @@ export default class SceneMain extends Phaser.Scene {
         });
         this.load.image("counter", "sprites/entities/counter.png");
         this.load.image("truck", "sprites/entities/truck.png");
+        this.load.image("berryBush", "sprites/entities/berryBush.png");
 
         // Items
         this.load.spritesheet("items", "sprites/items/items.png", {
@@ -64,6 +66,8 @@ export default class SceneMain extends Phaser.Scene {
             frameHeight: 16
         });
         this.load.image("orderCard", "sprites/hud/orderCard.png");
+        this.load.image("scoreCard", "sprites/hud/scoreCard.png");
+        this.load.image("timeCard", "sprites/hud/timeCard.png");
 
         // Particles
         this.load.spritesheet("slash", "sprites/particles/slash.png", {
@@ -87,12 +91,15 @@ export default class SceneMain extends Phaser.Scene {
         this.width = width * zoom;
         this.height = height * zoom;
 
+        this.difficultyMultiplier = 3;
+
         // Map creation
         this.map = this.make.tilemap({ key: "map", tileWidth: 16, tileHeight: 16 });
         const grassTileset = this.map.addTilesetImage("grass", "grass");
         this.grassLayer = this.map.createLayer("grass", grassTileset);
         const dirtTileset = this.map.addTilesetImage("dirt", "dirt");
         this.dirtLayer = this.map.createLayer("dirt", dirtTileset);
+        this.dirtLayer.setCollisionByProperty({ collide: true });
         const topTileset = this.map.addTilesetImage("trees", "trees");
         this.topLayer = this.map.createLayer("top", topTileset).setDepth(10);
         this.topLayer.setCollisionByProperty({ collide: true });
@@ -100,30 +107,21 @@ export default class SceneMain extends Phaser.Scene {
         // Counters
         this.counters = [];
         for (let i = 0; i < 4; i++) {
-            this.counters.push(new Counter(this, 300 + i * 32, 48));
+            this.counters.push(new Counter(this, 300 + i * 32, 512));
         }
 
-        this.truck = new Truck(this, 480, 64);
+        this.truck = new Truck(this, 480, 512);
 
-        // Keyboard key binding
-        this.cursors = this.input.keyboard.createCursorKeys();
-        this.keyboardBind = this.input.keyboard.addKeys({
-            attack: Phaser.Input.Keyboard.KeyCodes.SPACE,
-            one: Phaser.Input.Keyboard.KeyCodes.ONE,
-            two: Phaser.Input.Keyboard.KeyCodes.TWO,
-            three: Phaser.Input.Keyboard.KeyCodes.THREE,
-            use: Phaser.Input.Keyboard.KeyCodes.E,
-            action: Phaser.Input.Keyboard.KeyCodes.F,
-            drop: Phaser.Input.Keyboard.KeyCodes.G,
-            debug: Phaser.Input.Keyboard.KeyCodes.R
-        });
-
-        this.raptor = new Raptor(this, this.width / 2, this.height / 2);
+        this.raptor = new Raptor(this, 480, 576);
 
         this.entities = [];
-        EntityManager.spawnGroup(this, "chicken", 10, 64, 64, 256, 256);
-        EntityManager.spawnGroup(this, "sheep", 4, 256, 256, 512, 512);
-        EntityManager.spawnGroup(this, "pig", 6, 64, 256, 512, 512);
+        EntityManager.spawnGroup(this, "chicken", 6, 64, 64, 256, 256);
+        EntityManager.spawnGroup(this, "sheep", 4, 32, 750, 512, 256);
+        EntityManager.spawnGroup(this, "pig", 6, 256, 32, 512 + 128, 256);
+        EntityManager.spawnGroup(this, "chicken", 4, 512, 628, 256, 256);
+        EntityManager.spawnBerryBushes(this, 10, 0, 0, 1024, 1024);
+
+        this.nEggs = 0;
 
         this.cameras.main.setBounds(0, 0, 16 * 64, 16 * 64, true, true, true, false);
         this.physics.world.setBounds(0, 0, 16 * 64, 16 * 64, true, true, true, false);
@@ -139,13 +137,26 @@ export default class SceneMain extends Phaser.Scene {
         if (Globals.ENABLE_LIGHTS) {
             this.lights.enable();
             this.lights.setAmbientColor(0xcccccc);
-            this.ligth = this.lights.addLight(this.raptor.x, this.raptor.y, this.width * 2).setIntensity(0.25);
+            this.ligth = this.lights.addLight(this.raptor.x, this.raptor.y, 2048).setIntensity(0.33);
             this.raptor.sprite.setPipeline('Light2D');
             // this.entities.forEach(ent => ent.sprite.setPipeline('Light2D'));
             this.grassLayer.setPipeline('Light2D');
             this.dirtLayer.setPipeline('Light2D');
             this.topLayer.setPipeline('Light2D');
         }
+
+        // Keyboard key binding
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.keyboardBind = this.input.keyboard.addKeys({
+            attack: Phaser.Input.Keyboard.KeyCodes.SPACE,
+            one: Phaser.Input.Keyboard.KeyCodes.ONE,
+            two: Phaser.Input.Keyboard.KeyCodes.TWO,
+            three: Phaser.Input.Keyboard.KeyCodes.THREE,
+            use: Phaser.Input.Keyboard.KeyCodes.E,
+            action: Phaser.Input.Keyboard.KeyCodes.F,
+            drop: Phaser.Input.Keyboard.KeyCodes.G,
+            debug: Phaser.Input.Keyboard.KeyCodes.R
+        });
     }
 
     update(time, delta) {

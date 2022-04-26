@@ -15,21 +15,16 @@ export default class HudScene extends Phaser.Scene {
         this.height = this.cameras.main.height;
         this.width = this.cameras.main.width;
 
-        this.sceneMain.events.on("updateHud", this.updateHud, this);
-
-        // this.HUDInventoryTitle = this.add.text(148, this.height - 64, "Inventory", {
-        //     font: "10pt rainyhearts",
-        //     align: "left",
-        //     color: Globals.PALETTE_HEX[9]
-        // }).setOrigin(0.5, 0.5);
+        this.score = 0;
 
         // Inventory
         this.HUDInventory = [];
         this.HUDInventoryText = [];
         for (let i = 0; i < Globals.INVENTORY_SPACE; i++) {
-            this.HUDInventory.push(this.add.sprite(352 + i * 64, this.height - 56, "invSlot", 0).setOrigin(0.5, 0.5));
+            const offset = this.width / 2 - (Globals.INVENTORY_SPACE * 64) / 4;
+            this.HUDInventory.push(this.add.sprite(offset + i * 64, this.height - 56, "invSlot", 0).setOrigin(0.5, 0.5));
             this.HUDInventory[this.HUDInventory.length - 1].hold = null;
-            this.HUDInventoryText.push(this.add.sprite(352 + i * 64, this.height - 34, "numbers", i).setOrigin(0.5, 0.5));
+            this.HUDInventoryText.push(this.add.sprite(offset + i * 64, this.height - 34, "numbers", i).setOrigin(0.5, 0.5));
         }
         this.emptyInventorySlot = Globals.INVENTORY_SPACE;
 
@@ -44,21 +39,64 @@ export default class HudScene extends Phaser.Scene {
                 color: "#272736"
             }).setOrigin(0.5, 0.5));
             this.HUDOrders[this.HUDOrders.length - 1].add(this.add.text(0, 12, "RECIPE", {
-                font: "12pt rainyhearts",
+                font: "10pt rainyhearts",
                 align: "center",
                 color: "#272736"
             }).setOrigin(0.5, 0.5));
-            this.HUDOrders[this.HUDOrders.length - 1].bar = new LoadingBar(this, 64 + i * 96, -48, 100, 100, 64, 16);
+            this.HUDOrders[this.HUDOrders.length - 1].bar = new LoadingBar(this, 64 + i * 96, -48, 100, 100, 64, 12);
             this.HUDOrders[this.HUDOrders.length - 1].index = i;
             this.HUDOrders[this.HUDOrders.length - 1].active = false;
+            // this.HUDOrders[this.HUDOrders.length - 1].setScale(0.75);
         }
         this.activeOrders = 0;
+
+        this.newOrderTimer = this.time.addEvent({
+            delay: 1500,
+            callback: () => {
+                this.addOrder();
+                this.resetNewOrderTimer();
+            },
+            repeat: 0
+        });
+
+
+        // Score
+        this.HUDScore = this.add.sprite(this.width - 64, this.height - 64, "scoreCard", 0).setOrigin(0.5, 0.5);
+        this.HUDScoreText = this.add.text(this.width - 64, this.height - 50, "0", {
+            font: "14pt rainyhearts",
+            align: "center",
+            color: "#272736"
+        }).setOrigin(0.5, 0.5);
+
+        // Time Left
+        this.HUDTime = this.add.sprite(64, this.height - 64, "timeCard", 0).setOrigin(0.5, 0.5);
+        this.HUDTimeText = this.add.text(64, this.height - 50, Globals.GAME_TIME / 1000, {
+            font: "14pt rainyhearts",
+            align: "center",
+            color: "#272736"
+        }).setOrigin(0.5, 0.5);
+
+        this.gameTimer = this.time.addEvent({
+            delay: Globals.GAME_TIME,
+            callback: () => {
+                console.log("GAME OVER")
+            },
+            repeat: 0
+        });
+        this.time.addEvent({
+            delay: 1000,
+            callback: () => {
+                this.HUDTimeText.setText(Math.round(this.gameTimer.getRemainingSeconds()));
+            },
+            repeat: Globals.GAME_TIME - 1
+        });
 
         this.onChangeCurrentSlot(0);
     }
 
-    updateHud(event) {
-        // Main update of the entire HUD
+    addScore(amount) {
+        this.score += amount;
+        this.HUDScoreText.setText(this.score);
     }
 
     onChangeCurrentSlot(num) {
@@ -106,9 +144,15 @@ export default class HudScene extends Phaser.Scene {
 
                 order.name = meal.name;
                 order.recipe = meal.recipe;
-                order.time = meal.time;
+                order.time = meal.time * this.sceneMain.difficultyMultiplier;
+                order.score = meal.score;
+
+                let recipeToString = "";
+                meal.recipe.forEach((el) => recipeToString += el + "\n+ ");
+                recipeToString = recipeToString.substring(0, recipeToString.length - 3);
+
                 order.list[1].setText(meal.name)
-                order.list[2].setText(meal.recipe)
+                order.list[2].setText(recipeToString)
 
                 availableSlot = true;
                 order.active = true;
@@ -117,9 +161,9 @@ export default class HudScene extends Phaser.Scene {
                 order.timer = this.time.addEvent({
                     delay: order.time / 100,
                     callback: () => {
-                        order.bar.setPercent(1 - order.timer.getOverallProgress())
+                        order.bar.setPercent(1 - order.timer.getOverallProgress() + 0.01)
                         if (1 - order.timer.getOverallProgress() === 0) {
-                            console.log("finito")
+                            this.addScore(Globals.SCORE_ORDER_MISSED);
                             this.removeOrder(order.index)
                         }
 
@@ -167,12 +211,26 @@ export default class HudScene extends Phaser.Scene {
         });
     }
 
+    resetNewOrderTimer() {
+        this.newOrderTimer.remove();
+        this.newOrderTimer = null;
+        this.newOrderTimer = this.time.addEvent({
+            delay: Phaser.Math.Between(Globals.MIN_NEW_ORDER_TIME, Globals.MAX_NEW_ORDER_TIME),
+            callback: () => {
+                this.addOrder();
+                this.resetNewOrderTimer();
+            },
+            repeat: 0
+        });
+    }
+
     addItemToInventory(itemName, chopped, contains = []) {
         console.log('Added ' + itemName + ' to inventory.');
 
         for (let i = 0; i < Globals.INVENTORY_SPACE; i++) {
             if (this.HUDInventory[i].hold === null) {
                 this.HUDInventory[i].hold = new Item(this, this.HUDInventory[i].x, this.HUDInventory[i].y, itemName, true, chopped, contains);
+                this.HUDInventory[i].hold.sprite.setScale(2)
                 this.emptyInventorySlot--;
                 break;
             }
@@ -200,10 +258,16 @@ export default class HudScene extends Phaser.Scene {
                 if (serving === orderRecipe) {
                     console.warn("Matching, removing order " + i);
                     this.removeOrder(i);
+                    this.addScore(order.score);
                     found = true;
                 }
             }
         });
+
+        if (!found) {
+            console.warn("Wrong serving !")
+            this.addScore(Globals.SCORE_WRONG_SERVING);
+        }
     }
 
     onQuitGame() {

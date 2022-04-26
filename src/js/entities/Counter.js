@@ -13,7 +13,8 @@ export default class Counter extends Phaser.GameObjects.Sprite {
         this.sprite = this.scene.physics.add.sprite(this.x, this.y, "counter", 0).setOrigin(0.5, 0.5).setDepth(1);
         this.sprite.parentEntity = this;
 
-        this.sprite.body.setSize(this.width - 2, this.height - 2);
+        this.sprite.body.setSize(this.width, this.height - 2);
+        this.sprite.body.setOffset(0, 0);
         this.sprite.body.setImmovable(true);
 
         this.width = this.sprite.displayWidth;
@@ -54,7 +55,8 @@ export default class Counter extends Phaser.GameObjects.Sprite {
                         this.scene.raptor.infoBox.setVisible(false);
                     // Chop
                     if (this.hold !== null) {
-                        if (!this.hold.chopped && !this.hold.name === "Box" && !this.hold.name === "Egg" && !this.hold.name === "Berry") this.scene.raptor.infoBox.setVisible(true).setFrame(0).setPosition(this.x, this.y - 24);
+                        if (!this.hold.chopped && this.hold.name !== "Box" && this.hold.name !== "Egg" && this.hold.name !== "Berry")
+                            this.scene.raptor.infoBox.setVisible(true).setFrame(0).setPosition(this.x, this.y - 24);
                         else this.scene.raptor.infoBox.setVisible(false);
 
                         if (this.scene.hud.HUDInventory[this.scene.hud.currentSlot].hold === null)

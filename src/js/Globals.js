@@ -10,8 +10,15 @@ export const BLINK_DELAY = 250;
 export const BLINK_REPEAT = 5;
 export const INVENTORY_SPACE = 3;
 export const MAX_ORDERS = 6;
-export const MIN_EGG_SPAWN_TIME = 50000;
-export const MAX_EGG_SPAWN_TIME = 200000;
+export const MIN_EGG_SPAWN_TIME = 30000;
+export const MAX_EGG_SPAWN_TIME = 60000;
+export const MAX_EGGS = 9;
+export const MIN_NEW_ORDER_TIME = 15000;
+export const MAX_NEW_ORDER_TIME = 30000;
+export const BERRYBUSH_COOLDOWN = 10000;
+export const GAME_TIME = 180000;
+export const SCORE_ORDER_MISSED = -300;
+export const SCORE_WRONG_SERVING = -150;
 
 
 export const ENTITIES = {
@@ -32,7 +39,7 @@ export const ENTITIES = {
         "detectionRadius": 100,
         "affraid": false,
         "speed": 50,
-        "drops": "steak",
+        "drops": "lamb",
         "dropsMax": 2,
         "hp": 5
     },
@@ -40,10 +47,10 @@ export const ENTITIES = {
         "name": "Chicken",
         "color": 0xf2a65e,
         "detectionTime": 400,
-        "detectionRadius": 60,
+        "detectionRadius": 70,
         "affraid": true,
         "speed": 55,
-        "drops": "thighs",
+        "drops": "chicken",
         "dropsMax": 3,
         "hp": 3
     },
@@ -53,28 +60,27 @@ export const ENTITIES = {
         "detectionTime": 400,
         "detectionRadius": 120,
         "affraid": false,
-        "speed": 45,
-        "drops": "porkchop",
+        "speed": 55,
+        "drops": "pork",
         "dropsMax": 2,
-        "hp": 2
+        "hp": 4
     }
 }
 
 export const ITEMS = [
-    "box", "closed box", "steak", "chopped steak", "thighs", "chopped thighs", "porkchop", "chopped porkchop", "egg", "berry"
+    "box", "closed box", "lamb", "chopped lamb", "chicken", "chopped chicken", "pork", "chopped pork", "egg", "berry"
 ]
 
 export const MEALS = [
-    // { "name": "Tartare", "recipe": ["chopped steak", "egg"] },
-    { "name": "Steak XL", "recipe": ["steak", "steak"], "time": 50000 },
-    { "name": "Big Ribs", "recipe": ["porkchop", "porkchop", "porkchop"], "time": 20000 },
-    // { "name": "Egg Salad", "recipe": ["egg", "berry"] },
-    // { "name": "Carpaccio", "recipe": ["chopped steak", "chopped thighs", "mushroom"] },
-    // { "name": "Parisa", "recipe": ["chopped steak", "chopped porkchop", "berry"] },
-    // { "name": "Kibbeh", "recipe": ["chopped porkchop", "berry"] },
-    // { "name": "Toriwasa", "recipe": ["thighs", "egg"] },
-    // { "name": "Bucket", "recipe": ["thighs", "thighs"] },
-    // { "name": "Bucket XL", "recipe": ["thighs", "thighs", "thighs"] },
+    { "name": "Tartare", "recipe": ["chopped lamb", "egg"], "time": 50000, "score": 500 },
+    { "name": "lamb XL", "recipe": ["lamb", "lamb"], "time": 50000, "score": 300 },
+    { "name": "Big Ribs", "recipe": ["pork", "pork"], "time": 20000, "score": 400 },
+    { "name": "Egg Salad", "recipe": ["egg", "berry"], "time": 40000, "score": 250 },
+    { "name": "Parisa", "recipe": ["chopped lamb", "chopped pork", "berry"], "time": 70000, "score": 750 },
+    { "name": "Kibbeh", "recipe": ["chopped pork", "berry"], "time": 40000, "score": 450 },
+    { "name": "Toriwasa", "recipe": ["chicken", "egg"], "time": 40000, "score": 500 },
+    { "name": "Bucket", "recipe": ["chicken", "chicken"], "time": 30000, "score": 250 },
+    { "name": "Bucket XL", "recipe": ["chicken", "chicken", "chicken"], "time": 20000, "score": 300 },
 ]
 
 

@@ -42,7 +42,6 @@ export default class Entity extends Phaser.GameObjects.Sprite {
             repeat: -1
         });
         this.sprite.play("idle");
-
         this.width = this.sprite.displayWidth;
         this.height = this.sprite.displayHeight;
 
@@ -50,6 +49,7 @@ export default class Entity extends Phaser.GameObjects.Sprite {
 
         // Collision with map / borders / counters
         this.scene.physics.add.collider(this.sprite, this.scene.topLayer, null, null, this.scene);
+        this.scene.physics.add.collider(this.sprite, this.scene.dirtLayer, null, null, this.scene);
         this.scene.counters.forEach(counter => {
             this.scene.physics.add.collider(this.sprite, counter.sprite, null, null, this.scene);
         });
@@ -88,9 +88,12 @@ export default class Entity extends Phaser.GameObjects.Sprite {
             this.eggTimer = this.scene.time.addEvent({
                 delay: Phaser.Math.Between(Globals.MIN_EGG_SPAWN_TIME, Globals.MAX_EGG_SPAWN_TIME),
                 callback: () => {
-                    const dropOffset = 16;
-                    const egg = new Item(this.scene, this.x + Phaser.Math.Between(-dropOffset, dropOffset), this.y + Phaser.Math.Between(-dropOffset, dropOffset), "egg", true)
-                    this.scene.physics.add.overlap(this.scene.raptor.sprite, egg.sprite, (collider, it) => it.parentEntity.onCollideWithRaptor());
+                    if (this.scene.nEggs < Globals.MAX_EGGS) {
+                        this.scene.nEggs++;
+                        const dropOffset = 16;
+                        const egg = new Item(this.scene, this.x + Phaser.Math.Between(-dropOffset, dropOffset), this.y + Phaser.Math.Between(-dropOffset, dropOffset), "egg", true);
+                        this.scene.physics.add.overlap(this.scene.raptor.sprite, egg.sprite, (collider, it) => it.parentEntity.onCollideWithRaptor());
+                    }
                 },
                 callbackScope: this,
                 loop: true
